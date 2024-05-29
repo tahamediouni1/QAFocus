@@ -1,0 +1,46 @@
+.jumbotron {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, .2);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  border-radius: 10px;
+  padding: 30px 40px;
+}
+
+.smaller-paragraph {
+  font-size: 0.8rem; /* Adjust the font size as needed */
+}
+
+.centered-text {
+  text-align: center;
+}
+
+.centered-button {
+  display: flex; /* Enable flexbox for centering */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+}
+
+
+.btn {
+  background-color: #323642; /* Set background color to #FFD100 */
+  /* Existing styles for primary button */
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas,
+  'Courier New'
+  monospace;
+}
