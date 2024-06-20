@@ -15,14 +15,14 @@ const Navbar = ({ logout, isAuthenticated, user }) => {
 
     const tpm_focus = () => {
         if (isAuthenticated) {
-            window.location.href = 'http://localhost:3000/';
+            window.location.href = 'http://localhost:8000/';
         }
     };
 
     const authLinks = (
         <Fragment>
             <li className='nav-item'>
-                <a className='nav-link' href='http://localhost:3000/' onClick={tpm_focus}>TPM Focus</a>
+                <a className='nav-link' href='http://localhost:8000/test-execution' onClick={tpm_focus}>QAFocus.ai</a>
             </li>
             {user && user.is_staff && (
                 <li className='nav-item'>
@@ -42,7 +42,7 @@ const Navbar = ({ logout, isAuthenticated, user }) => {
     return (
         <Fragment>
             <nav className='navbar navbar-expand-lg navbar-light bg-light'>
-                <Link className='navbar-brand' to='/'>TPM</Link>
+                <Link className='navbar-brand' to='/'>QAFocus</Link>
                 <button 
                     className='navbar-toggler' 
                     type='button' 

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Automation Interface</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('back1.png') no-repeat center center fixed; 
+            background-size: cover;
+        }
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.7);
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            padding: 10px 20px;
+            background: rgba(0, 123, 255, 0.8);
+        }
+        .header a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        .header a:hover {
+            background-color: #f8f8f8;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/login">Sign In</a>
+        <a href="/signup">Sign Up</a>
+    </div>
+    <div class="container">
+        <h1>Enter URL to Test</h1>
+        <form action="/start" method="post">
+            <input type="text" name="url" required placeholder="Enter URL here">
+            <button type="submit">Create Test</button>
+        </form>
+        <button onclick="location.href='index1.html'">Start Test</button>
+    </div>
+</body>
+</html>

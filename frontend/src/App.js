@@ -1,7 +1,7 @@
 // App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-
+import TestExecution from './components/TestExecution';
 import Home from './containers/Home/Home';
 import Login from './containers/Login/Login';
 import Signup from './containers/Signup/Signup';
@@ -16,7 +16,8 @@ import PrivateRoute from './PrivateRoute';
 import './App.css';
 import { Provider } from 'react-redux';
 import store from './store';
-
+import Dashboard from './components/Dashboard';
+import ProjectPage from './components/ProjectPage';
 import Layout from './hocs/Layout';
 
 const App = () => (
@@ -24,6 +25,7 @@ const App = () => (
     <Router>
       <Layout>
         <Switch>
+          <PrivateRoute exact path='/test-execution' component={TestExecution} />
           <Route exact path='/' component={Home} />
           <Route exact path='/login' component={Login} />
           <Route exact path='/signup' component={Signup} />

@@ -1,24 +1,26 @@
 // PrivateRoute.js
 import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { connect } from 'react-redux';
 
-const PrivateRoute = ({ component: Component, ...rest }) => {
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const user = useSelector((state) => state.auth.user);
-
+const PrivateRoute = ({ component: Component, auth, ...rest }) => {
+  const { isAuthenticated } = auth;
   return (
-    <Route
-      {...rest}
-      render={(props) =>
-        isAuthenticated && user && user.is_staff ? (
+    <Route 
+      {...rest} 
+      render={props => 
+        isAuthenticated ? (
           <Component {...props} />
         ) : (
-          <Redirect to="/not-authorized" />
+          <Redirect to='/not-authorized' />
         )
-      }
+      } 
     />
   );
 };
 
-export default PrivateRoute;
+const mapStateToProps = state => ({
+  auth: state.auth
+});
+
+export default connect(mapStateToProps)(PrivateRoute);
