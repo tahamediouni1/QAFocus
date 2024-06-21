@@ -1,0 +1,156 @@
+[
+    {
+        "selector": "input#search",
+        "timestamp": 1718968795427,
+        "type": "focus"
+    },
+    {
+        "scrollX": 0,
+        "scrollY": 0,
+        "timestamp": 1718968795575,
+        "type": "click",
+        "x": 620,
+        "y": 31
+    },
+    {
+        "key": "h",
+        "timestamp": 1718968796388,
+        "type": "key_press"
+    },
+    {
+        "key": "e",
+        "timestamp": 1718968796588,
+        "type": "key_press"
+    },
+    {
+        "key": "l",
+        "timestamp": 1718968796847,
+        "type": "key_press"
+    },
+    {
+        "key": "l",
+        "timestamp": 1718968797010,
+        "type": "key_press"
+    },
+    {
+        "key": "o",
+        "timestamp": 1718968797244,
+        "type": "key_press"
+    },
+    {
+        "key": " ",
+        "timestamp": 1718968797464,
+        "type": "key_press"
+    },
+    {
+        "key": "t",
+        "timestamp": 1718968797727,
+        "type": "key_press"
+    },
+    {
+        "key": "h",
+        "timestamp": 1718968797932,
+        "type": "key_press"
+    },
+    {
+        "key": "e",
+        "timestamp": 1718968798195,
+        "type": "key_press"
+    },
+    {
+        "key": " ",
+        "timestamp": 1718968798397,
+        "type": "key_press"
+    },
+    {
+        "key": "w",
+        "timestamp": 1718968798614,
+        "type": "key_press"
+    },
+    {
+        "key": "o",
+        "timestamp": 1718968798797,
+        "type": "key_press"
+    },
+    {
+        "key": "r",
+        "timestamp": 1718968799028,
+        "type": "key_press"
+    },
+    {
+        "key": "l",
+        "timestamp": 1718968799245,
+        "type": "key_press"
+    },
+    {
+        "key": "d",
+        "timestamp": 1718968799447,
+        "type": "key_press"
+    },
+    {
+        "key": " ",
+        "timestamp": 1718968799611,
+        "type": "key_press"
+    },
+    {
+        "key": "Control",
+        "timestamp": 1718968799945,
+        "type": "key_press"
+    },
+    {
+        "keys": "Control+a",
+        "timestamp": 1718968800145,
+        "type": "key_combination"
+    },
+    {
+        "key": "Backspace",
+        "timestamp": 1718968800784,
+        "type": "key_press"
+    },
+    {
+        "key": "h",
+        "timestamp": 1718968801983,
+        "type": "key_press"
+    },
+    {
+        "key": "e",
+        "timestamp": 1718968802170,
+        "type": "key_press"
+    },
+    {
+        "key": "y",
+        "timestamp": 1718968802360,
+        "type": "key_press"
+    },
+    {
+        "key": " ",
+        "timestamp": 1718968802745,
+        "type": "key_press"
+    },
+    {
+        "selector": "input#search",
+        "timestamp": 1718968803642,
+        "type": "input_change",
+        "value": "hey ",
+        "x": 458.3999938964844,
+        "y": 15
+    },
+    {
+        "selector": "input#search",
+        "timestamp": 1718968803643,
+        "type": "blur"
+    },
+    {
+        "scrollX": 0,
+        "scrollY": 0,
+        "timestamp": 1718968803742,
+        "type": "click",
+        "x": 996,
+        "y": 40
+    },
+    {
+        "key": "Escape",
+        "timestamp": 1718968806297,
+        "type": "key_press"
+    }
+]

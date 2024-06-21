@@ -79,7 +79,18 @@ const Dashboard = () => {
   const fetchProjects = async () => {
     try {
       const response = await axios.get('http://127.0.0.1:5000/projects');
-      setProjects(response.data);
+      const projectsWithDescriptions = await Promise.all(
+        response.data.map(async (project) => {
+          try {
+            const descResponse = await axios.get(`http://127.0.0.1:5000/projects/${project.id}/description`);
+            return { ...project, description: descResponse.data.description };
+          } catch (error) {
+            console.error('Error fetching project description:', error);
+            return { ...project, description: '' };
+          }
+        })
+      );
+      setProjects(projectsWithDescriptions);
     } catch (error) {
       console.error('Error fetching projects:', error);
     }
