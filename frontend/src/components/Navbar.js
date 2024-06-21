@@ -22,7 +22,7 @@ const Navbar = ({ logout, isAuthenticated, user }) => {
     const authLinks = (
         <Fragment>
             <li className='nav-item'>
-                <a className='nav-link' href='http://localhost:8000/test-execution' onClick={tpm_focus}>QAFocus.ai</a>
+                <a className='nav-link' href='http://localhost:8000/dashboard' onClick={tpm_focus}>QAFocus.ai Dashboard</a>
             </li>
             {user && user.is_staff && (
                 <li className='nav-item'>

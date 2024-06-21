@@ -10,18 +10,14 @@ from selenium.webdriver.common.by import By
 import traceback
 
 class TestRunner:
-    def __init__(self, file_path):
-        self.file_path = file_path
+    def __init__(self, actions):
+        self.actions = actions  # Parse JSON actions
         self.driver = self.init_driver()
 
     def init_driver(self):
         chrome_options = Options()
         chrome_options.add_argument("--kiosk")  # Start browser maximized
         return webdriver.Chrome(options=chrome_options)
-
-    def load_actions(self):
-        with open(self.file_path, "r") as file:
-            return json.load(file)
 
     def ensure_page_loaded(self):
         """Wait until the document is fully loaded"""
@@ -33,7 +29,7 @@ class TestRunner:
         try:
             self.driver.get(initial_url)
             self.ensure_page_loaded()
-            actions = self.load_actions()
+            actions = self.actions
             last_url = self.driver.current_url
 
             for action in actions:

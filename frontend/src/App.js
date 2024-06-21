@@ -1,7 +1,6 @@
-// App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import TestExecution from './components/TestExecution';
+import TestExecution from './pages/TestExecution';
 import Home from './containers/Home/Home';
 import Login from './containers/Login/Login';
 import Signup from './containers/Signup/Signup';
@@ -16,8 +15,7 @@ import PrivateRoute from './PrivateRoute';
 import './App.css';
 import { Provider } from 'react-redux';
 import store from './store';
-import Dashboard from './components/Dashboard';
-import ProjectPage from './components/ProjectPage';
+import Dashboard from './pages/Dashboard';
 import Layout from './hocs/Layout';
 
 const App = () => (
@@ -25,10 +23,11 @@ const App = () => (
     <Router>
       <Layout>
         <Switch>
-          <PrivateRoute exact path='/test-execution' component={TestExecution} />
           <Route exact path='/' component={Home} />
           <Route exact path='/login' component={Login} />
           <Route exact path='/signup' component={Signup} />
+          <Route exact path="/dashboard" component={Dashboard} />
+          <Route exact path="/projects/:projectId/testruns" component={TestExecution} />
           <Route exact path='/facebook' component={Facebook} />
           <Route exact path='/google' component={Google} />
           <Route exact path='/reset-password' component={ResetPassword} />

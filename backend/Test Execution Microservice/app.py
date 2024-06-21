@@ -1,131 +1,171 @@
 import os
-from flask import Flask, render_template, request, jsonify
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
-from functools import wraps
-from automation.recorder import Recorder
-from automation.test_runner import TestRunner
-from automation.screen_recorder import ScreenRecorder
+from flask import Flask, request, jsonify
+from flask_jwt_extended import JWTManager
+import json
 import threading
+from automation.test_runner import TestRunner
+from automation.recorder import Recorder
+from automation.screen_recorder import ScreenRecorder
 from flask_cors import CORS
-from models import db, Project, init_db
-from flask_migrate import Migrate
-
-
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://test_user:test_password@localhost:3306/test_database'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
-
-db.init_app(app)
-migrate = Migrate(app, db)
 jwt = JWTManager(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-def roles_required(required_roles):
-    def decorator(func):
-        @wraps(func)
-        @jwt_required()
-        def wrapper(*args, **kwargs):
-            identity = get_jwt_identity()
-            if 'role' not in identity or identity['role'] not in required_roles:
-                return jsonify({'message': 'Permission denied'}), 403
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+PROJECTS_DIR = 'projects'
 
-recorder = None
-screen_recorder = None
-recorder_lock = threading.Lock()
+screen_recorders = {}
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return jsonify({'message': 'Welcome to the Test Execution Microservice'})
+
+@app.route('/projects', methods=['GET'])
+def get_projects():
+    try:
+        projects = [{'id': project, 'name': project} for project in os.listdir(PROJECTS_DIR) if os.path.isdir(os.path.join(PROJECTS_DIR, project))]
+        return jsonify(projects)
+    except FileNotFoundError:
+        return jsonify([])
 
 @app.route('/projects', methods=['POST'])
 def create_project():
     data = request.json
-    new_project = Project(name=data['name'], description=data['description'])
-    db.session.add(new_project)
-    db.session.commit()
-    return jsonify({'id': new_project.id, 'name': new_project.name, 'description': new_project.description}), 201
+    project_name = data.get('name')
+    if not project_name:
+        return jsonify({'message': 'Project name is required'}), 400
+    project_dir = os.path.join(PROJECTS_DIR, project_name)
+    os.makedirs(project_dir, exist_ok=True)
+    # Save the description
+    description = data.get('description', '')
+    with open(os.path.join(project_dir, 'description.txt'), 'w') as f:
+        f.write(description)
+    return jsonify({'message': 'Project created successfully', 'name': project_name}), 201
 
-@app.route('/projects', methods=['GET'])
-def get_projects():
-    projects = Project.query.all()
-    return jsonify([{'id': project.id, 'name': project.name, 'description': project.description} for project in projects]), 200
+@app.route('/projects/<project_id>', methods=['DELETE'])
+def delete_project(project_id):
+    project_dir = os.path.join(PROJECTS_DIR, project_id)
+    if os.path.exists(project_dir) and os.path.isdir(project_dir):
+        for root, dirs, files in os.walk(project_dir, topdown=False):
+            for name in files:
+                os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
+        os.rmdir(project_dir)
+        return jsonify({'message': 'Project deleted successfully'}), 200
+    return jsonify({'message': 'Project not found'}), 404
 
-@app.route('/projects/<int:project_id>', methods=['GET'])
-def get_project(project_id):
-    project = Project.query.get_or_404(project_id)
-    return jsonify({'id': project.id, 'name': project.name, 'description': project.description, 'test_files': project.test_files}), 200
+@app.route('/projects/<project_id>/testruns', methods=['GET'])
+def get_test_runs(project_id):
+    project_dir = os.path.join(PROJECTS_DIR, project_id)
+    try:
+        test_files = [f for f in os.listdir(project_dir) if f.endswith('.json')]
+        return jsonify(test_files)
+    except FileNotFoundError:
+        return jsonify({'message': 'Project not found'}), 404
 
+@app.route('/projects/<project_id>/testruns', methods=['POST'])
+def create_test_run(project_id):
+    data = request.json
+    test_name = data.get('name')
+    actions = data.get('actions')
+    if not test_name or not actions:
+        return jsonify({'message': 'Test name and actions are required'}), 400
+    test_path = os.path.join(PROJECTS_DIR, project_id, f"{test_name}.json")
+    with open(test_path, 'w') as f:
+        json.dump(actions, f)
+    return jsonify({'message': 'Test created successfully', 'name': test_name}), 201
 
 @app.route('/start', methods=['POST'])
 def start():
-    global recorder, screen_recorder
-    data = request.get_json()
-    url = data.get('url')
-    filename = data.get('filename')
-    if not url or not filename:
-        return "URL and filename are required", 400
-
-    with recorder_lock:
-        if recorder is not None:
-            return "Recording is already in progress", 409
-
-        recorder = Recorder(url, filename)
-        screen_recorder = ScreenRecorder(output_filename=f'{filename}_manual_test.avi', frame_rate=10.0, with_audio=False)
-
-        threading.Thread(target=recorder.start_recording).start()
-        threading.Thread(target=screen_recorder.start_recording).start()
-
-    return jsonify({'message': 'Recording started'}), 200
-
-@app.route('/test')
-def test_page():
-    return render_template('index1.html')
-
-@app.route('/run-test', methods=['POST'])
-def run_test():
-    global screen_recorder
     data = request.json
     url = data.get('url')
     filename = data.get('filename')
-    if not url or not filename:
-        return jsonify({'error': 'URL and filename are required'}), 400
+    project_id = data.get('project_id')
+    if not url or not filename or not project_id:
+        return jsonify({'message': 'URL, filename, and project ID are required'}), 400
 
-    filepath = f'{filename}'
+    filepath = os.path.join(PROJECTS_DIR, project_id, f"{filename}.json")
+    recorder = Recorder(url, filepath)
+    recording_filename = os.path.join(PROJECTS_DIR, project_id, f"{filename}_manual_test.avi")
+    screen_recorder = ScreenRecorder(output_filename=recording_filename)
+    screen_recorders[filename] = screen_recorder
+
+    threading.Thread(target=recorder.start_recording).start()
+    threading.Thread(target=screen_recorder.start_recording).start()
+
+    return jsonify({'message': 'Recording started'}), 200
+
+@app.route('/projects/<project_id>/testruns/<filename>', methods=['POST'])
+def run_test(project_id, filename):
+    data = request.json
+    url = data.get('url')
+    if not url or not filename or not project_id:
+        return jsonify({'message': 'URL, filename, and project ID are required'}), 400
+
+    test_path = os.path.join(PROJECTS_DIR, project_id, f"{filename}")
     try:
-        screen_recorder = ScreenRecorder(output_filename=f'{filename}_automated_test.avi', frame_rate=10.0, with_audio=False)
-        screen_recorder.start_recording()
+        with open(test_path, 'r') as f:
+            actions = json.load(f)
+    except FileNotFoundError:
+        return jsonify({'message': 'Test file not found'}), 404
 
-        runner = TestRunner(filepath)
-        runner.run_test(url)
+    # Run the test using TestRunner
+    test_runner = TestRunner(actions)
+    recording_filename = os.path.join(PROJECTS_DIR, project_id, f"{filename.replace('.json', '')}_automated_test.avi")
+    screen_recorder = ScreenRecorder(output_filename=recording_filename)
+    screen_recorders[filename] = screen_recorder
 
-        screen_recorder.stop_recording()
-        return jsonify({'message': 'Test completed successfully!'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    threading.Thread(target=test_runner.run_test, args=(url,)).start()
+    threading.Thread(target=screen_recorder.start_recording).start()
 
-@app.route('/stop', methods=['GET'])
+    return jsonify({'message': 'Test run completed successfully'}), 200
+
+@app.route('/projects/<project_id>/testruns/<filename>', methods=['DELETE'])
+def delete_test_run(project_id, filename):
+    test_path = os.path.join(PROJECTS_DIR, project_id, filename)
+    manual_video_path = os.path.join(PROJECTS_DIR, project_id, f"{filename.replace('.json', '')}_manual_test.avi")
+    automated_video_path = os.path.join(PROJECTS_DIR, project_id, f"{filename.replace('.json', '')}_automated_test.avi")
+
+    deleted_files = []
+
+    if os.path.exists(test_path):
+        os.remove(test_path)
+        deleted_files.append(test_path)
+
+    if os.path.exists(manual_video_path):
+        os.remove(manual_video_path)
+        deleted_files.append(manual_video_path)
+
+    if os.path.exists(automated_video_path):
+        os.remove(automated_video_path)
+        deleted_files.append(automated_video_path)
+
+    if deleted_files:
+        return jsonify({'message': 'Test files deleted successfully', 'deleted_files': deleted_files}), 200
+    return jsonify({'message': 'Test file not found'}), 404
+
+@app.route('/stop', methods=['POST'])
 def stop():
-    global recorder, screen_recorder
-    with recorder_lock:
-        if recorder:
-            recorder.stop_recording()
-            recorder = None
-        if screen_recorder:
-            screen_recorder.stop_recording()
-            screen_recorder = None
-        return 'Recording stopped and data saved.' if recorder or screen_recorder else 'No active recording.'
+    data = request.json
+    filename = data.get('filename')
+    if filename in screen_recorders:
+        screen_recorders[filename].stop_recording()
+        del screen_recorders[filename]
+    return jsonify({'message': 'Recording stopped'}), 200
 
-@app.route('/list-tests', methods=['GET'])
-def list_tests():
-    test_files = [f for f in os.listdir('.') if f.endswith('.json')]
-    print("Files found:", test_files)  # Debug print statement
-    return jsonify({'tests': test_files})
+@app.route('/projects/<project_id>/description', methods=['GET'])
+def get_project_description(project_id):
+    project_dir = os.path.join(PROJECTS_DIR, project_id)
+    description_path = os.path.join(project_dir, 'description.txt')
+    try:
+        with open(description_path, 'r') as f:
+            description = f.read()
+        return jsonify({'description': description})
+    except FileNotFoundError:
+        return jsonify({'description': ''}), 404
 
 if __name__ == '__main__':
-    init_db(app)
+    os.makedirs(PROJECTS_DIR, exist_ok=True)
     app.run(host='0.0.0.0', port=5000, debug=True)

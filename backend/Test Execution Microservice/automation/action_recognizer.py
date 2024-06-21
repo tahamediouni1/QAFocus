@@ -6,13 +6,11 @@ class ActionRecognizer:
         self.driver = driver
 
     def inject_script(self):
-        # Check if the script is already injected and active
         check_script = "return window.seleniumMonitorInitialized || false;"
         if not self.driver.execute_script(check_script):
             self.monitor_actions()
 
     def monitor_actions(self):
-        # JavaScript for monitoring user actions
         script = """
         if (window.seleniumMonitorInitialized) return;
         window.seleniumMonitorInitialized = true;
@@ -193,11 +191,10 @@ class ActionRecognizer:
                 timestamp: Date.now()
             });
         }, true);
-
         """
         self.driver.execute_script(script)
 
-    def fetch_and_save_actions(self, filepath='recorded_actions.json'):
+    def fetch_and_save_actions(self, filepath):
         self.inject_script()  # Ensure the script is active
         actions = self.driver.execute_script("return window.seleniumMonitorActions;")
         with open(filepath, 'w') as file:
