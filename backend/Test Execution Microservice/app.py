@@ -17,6 +17,12 @@ PROJECTS_DIR = 'projects'
 
 screen_recorders = {}
 
+def stop_recording(filename):
+    if filename in screen_recorders:
+        screen_recorders[filename].stop_recording()
+        del screen_recorders[filename]
+    print("Recording stopped")
+
 @app.route('/')
 def index():
     return jsonify({'message': 'Welcome to the Test Execution Microservice'})
@@ -112,15 +118,16 @@ def run_test(project_id, filename):
         return jsonify({'message': 'Test file not found'}), 404
 
     # Run the test using TestRunner
-    test_runner = TestRunner(actions)
     recording_filename = os.path.join(PROJECTS_DIR, project_id, f"{filename.replace('.json', '')}_automated_test.avi")
     screen_recorder = ScreenRecorder(output_filename=recording_filename)
     screen_recorders[filename] = screen_recorder
 
+    test_runner = TestRunner(actions)
+
     threading.Thread(target=test_runner.run_test, args=(url,)).start()
     threading.Thread(target=screen_recorder.start_recording).start()
 
-    return jsonify({'message': 'Test run completed successfully'}), 200
+    return jsonify({'message': 'Test run started'}), 200
 
 @app.route('/projects/<project_id>/testruns/<filename>', methods=['DELETE'])
 def delete_test_run(project_id, filename):

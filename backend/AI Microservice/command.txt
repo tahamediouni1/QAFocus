@@ -1,0 +1,1 @@
+curl -X POST http://127.0.0.1:5000/process/videos -F "manual_video=@C:\Users\lenovo\Desktop\FullstackPFE\backend\AI Microservice\manual_test.avi" -F "automated_video=@C:\Users\lenovo\Desktop\FullstackPFE\backend\AI Microservice/automated_test.avi"
